@@ -2,9 +2,6 @@ import json
 import tkinter as tk
 #import groupme_analyzer
 
-
-
-
 #returns a dict where key is user id and value is member name
 def getMembers():
     with open('Groupme Data/conversation.json', encoding = 'UTF-8') as json_file:
@@ -120,9 +117,6 @@ titleLabel.pack()
 '''
 Button Settings
 '''
-
-
-#need to use classes to get return values from functions
 
 root.mainloop()
         
