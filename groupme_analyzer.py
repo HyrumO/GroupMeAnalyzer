@@ -63,7 +63,7 @@ def mostLiked(data):
     
     print(str(maxMessages) + "\n" + "Likes: " + str(maxLikes))
 
-#prints a list of members ordered by total likes given to them
+#returns a list of members ordered by total likes given to them (member name, like count)
 def likeRanking(data):    
     memberDict = getMembers()
     likesDict = dict.fromkeys(memberDict, 0) #key = userid, value = total likes for that user
@@ -73,31 +73,87 @@ def likeRanking(data):
         #have to check if key exists to avoid adding to nothing
         if((message["user_id"]) in likesDict.keys()):
             likesDict[message["user_id"]] += len(message["favorited_by"])
+        else: 
+            #if person has left the chat this will trigger, they will not have a name unless manually added in getMembers()
+            likesDict[message["user_id"]] = len(message["favorited_by"])        
     
     #converting userids to names
     namesDict = {}
     for userid in likesDict:
-        #print(userid)
         if(userid in memberDict.keys()): #change each userid to a name
             namesDict[memberDict[userid]] = likesDict[userid]
         else:
-            print(userid)
+            #if they left the chat, can't assign a name
+            namesDict[userid] = likesDict[userid]
             
     
     sortedLikes = sorted(namesDict.items(), key=lambda x: x[1], reverse=True)
-    #print(sortedLikes)
+    return sortedLikes
     
+    '''
     file = open("Like Leaderboard.txt", "w", encoding = 'UTF-8')
     file.write("Like Leaderboard \n\n----------------- \n\n" )
     for name, likes in sortedLikes:
         file.write(name + ": " + str(likes) + "\n")
         
     file.close()
+    '''
+
+#returns a list of members ordered by their total sent messages
+def messageRanking(data):
+    memberDict = getMembers()
+    messagesDict = dict.fromkeys(memberDict, 0) #key = userid, value = total messages from that user
+    
+    #totaling the messages for each userid
+    for message in data:
+        #have to check if key exists to avoid adding to nothing
+        if((message["user_id"]) in messagesDict.keys()):
+            messagesDict[message["user_id"]] += 1
+        else: 
+            #if person has left the chat this will trigger, they will not have a name unless manually added in getMembers()
+            messagesDict[message["user_id"]] = 1
+        
+    #converting userids to names
+    namesDict = {}
+    for userid in messagesDict:
+        if(userid in memberDict.keys()): #change each userid to a name
+            namesDict[memberDict[userid]] = messagesDict[userid]
+        else:
+            #if they left the chat, can't assign a name
+            namesDict[userid] = messagesDict[userid]
             
+    
+    sortedMessages = sorted(namesDict.items(), key=lambda x: x[1], reverse=True)
+    return sortedMessages
+
+#returns a list of members ordered by their like/message ration
+def likeRatioRanking(data):
+    likesDict = dict(likeRanking(data))
+    messagesDict = dict(messageRanking(data))
+    ratioDict = {}
+    
+    for name in messagesDict:
+        likes = likesDict[name]
+        messages = messagesDict[name]
+        if(messages == 0):
+            ratioDict[name] = 0
+        else:
+            ratioDict[name] = round(likes/messages, 3)
+    
+    sortedRatios = sorted(ratioDict.items(), key=lambda x: x[1], reverse=True)
+    #return sortedRatios
+
+    file = open("Like Ratio Leaderboard.txt", "w", encoding = 'UTF-8')
+    file.write("Like Ratio Leaderboard \n\n-------------------- \n\n" )
+    for name, likes in sortedRatios:
+        file.write(name + ": " + str(likes) + "\n")
+        
+    file.close()
+
 
 with open('Groupme Data/message.json', encoding = 'UTF-8') as json_file:
     data = json.load(json_file)
-    #mostLiked(data)
+    print(likeRatioRanking(data))
 
 
 '''
@@ -119,4 +175,4 @@ Button Settings
 '''
 
 root.mainloop()
-        
+
