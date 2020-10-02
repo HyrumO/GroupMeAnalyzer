@@ -4,7 +4,7 @@ import tkinter as tk
 
 #param to decide if you should print or just write to file
 #will overwrite everytime you run
-WriteToFile = False
+WriteToFile = True
 
 #returns a dict where key is user id and value is member name
 def getMembers():
@@ -55,17 +55,19 @@ def findBoogity(data):
 
 #finds every message from Zo and saves it in a txt file
 def findZo(data):
-    file = open("Files\\zo.txt", "w", encoding = 'UTF-8')
+    findzo = open("Files\\zo.txt", "w", encoding = 'UTF-8')
     for message in data:
         if(message["name"] == "Zo"):
             if WriteToFile == False:
                 print(message["name"] + ": " + str(message["text"]) + "\n")
+                
 
             else:
-                 file.write(message["name"] + ": " + str(message["text"]) + "\n\n")
+                findzo.write(message["name"] + ": " + str(message["text"]) + "\n\n")
+                
 
            
-    file.close()
+    findzo.close()
 
 #prints the most liked message(s) of all time
 def mostLiked(data):
@@ -217,12 +219,12 @@ with open('Groupme Data/message.json', encoding = 'UTF-8') as json_file:
 
 #run all these functions for the data to be printed or written to a file
 #these functions are generally intensive so don't run them all at once
-#findBoogity(data)
-#findZo(data)
-#mostLiked(data)
-#likeRanking(data)
-#messageRanking(data)
-#likeRatioRanking(data)
+findBoogity(data)
+findZo(data)
+mostLiked(data)
+likeRanking(data)
+messageRanking(data)
+likeRatioRanking(data)
 
 
 
