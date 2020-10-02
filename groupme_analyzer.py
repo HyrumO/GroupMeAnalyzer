@@ -216,8 +216,9 @@ with open('Groupme Data/message.json', encoding = 'UTF-8') as json_file:
     #print(likeRatioRanking(data))
 
 #run all these functions for the data to be printed or written to a file
+#these functions are generally intensive so don't run them all at once
 #findBoogity(data)
-findZo(data)
+#findZo(data)
 #mostLiked(data)
 #likeRanking(data)
 #messageRanking(data)
