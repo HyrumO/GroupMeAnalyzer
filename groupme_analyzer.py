@@ -2,6 +2,10 @@ import json
 import tkinter as tk
 #import groupme_analyzer
 
+#param to decide if you should print or just write to file
+#will overwrite everytime you run
+WriteToFile = False
+
 #returns a dict where key is user id and value is member name
 def getMembers():
     with open('Groupme Data/conversation.json', encoding = 'UTF-8') as json_file:
@@ -35,33 +39,60 @@ def getMembers():
 
 #prints every message containing boogity
 def findBoogity(data):
+    findBoog = open("Files\\findBoogity.txt","w",encoding = 'UTF-8')
     for message in data:
         if("Boogity" in str(message["text"]) or "boogity" in str(message["text"])):
-            print(message["name"] + ": " + str(message["text"]) + "\n\n")
+            if WriteToFile == False:
+                print(message["name"] + ": " + str(message["text"]) + "\n\n")
+            else:
+                #writes the message on a new line
+                write_to = message["name"] + ": " + str(message["text"])
+                findBoog.write(write_to+'\n')
+    findBoog.close()
+    
+
+            
 
 #finds every message from Zo and saves it in a txt file
 def findZo(data):
-    file = open("zo.txt", "w", encoding = 'UTF-8')
+    file = open("Files\\zo.txt", "w", encoding = 'UTF-8')
     for message in data:
         if(message["name"] == "Zo"):
-            #print(p["name"] + ": " + str(p["text"]) + "\n")
-            file.write(message["name"] + ": " + str(message["text"]) + "\n\n")
-    
+            if WriteToFile == False:
+                print(message["name"] + ": " + str(message["text"]) + "\n")
+
+            else:
+                 file.write(message["name"] + ": " + str(message["text"]) + "\n\n")
+
+           
     file.close()
 
 #prints the most liked message(s) of all time
 def mostLiked(data):
     maxLikes = 0
     maxMessages = []
-    
+
+    mMessages = open("Files\\mostMessagesLikes.txt","w",encoding = 'UTF-8')
+
+
     for message in data:
         if(len(message["favorited_by"]) == maxLikes):
             maxMessages.append(message["name"] + ": " + str(message["text"]))
         elif(len(message["favorited_by"]) > maxLikes):
             maxMessages = [message["name"] + ": " + str(message["text"])]
             maxLikes = len(message["favorited_by"])
+    if WriteToFile == False:
+        print(str(maxMessages) + "\n" + "Likes: " + str(maxLikes))
+    else:
+        writeTo = str(maxMessages)+": "+str(maxLikes)
+
+        mMessages.write(writeTo+'\n')
+
+       
     
-    print(str(maxMessages) + "\n" + "Likes: " + str(maxLikes))
+    mMessages.close()
+
+    
 
 #returns a list of members ordered by total likes given to them (member name, like count)
 def likeRanking(data):    
@@ -69,6 +100,8 @@ def likeRanking(data):
     likesDict = dict.fromkeys(memberDict, 0) #key = userid, value = total likes for that user
 
     #totaling the likes for each userid
+    likerank = open("Files\\likeRanking.txt","w",encoding = 'UTF-8')
+
     for message in data:
         #have to check if key exists to avoid adding to nothing
         if((message["user_id"]) in likesDict.keys()):
@@ -88,7 +121,19 @@ def likeRanking(data):
             
     
     sortedLikes = sorted(namesDict.items(), key=lambda x: x[1], reverse=True)
-    return sortedLikes
+    if WriteToFile == False:
+        print(sortedLikes)
+        return sortedLikes
+        
+    else:
+        #I borrowed a bit of your commented out code for this one, hope thats okay
+        for name, likes in sortedLikes:
+            likerank.write(name + ": " + str(likes) + "\n")
+        
+        likerank.close()
+        #using sorted likes in like ratio function
+        return sortedLikes
+
     
     '''
     file = open("Like Leaderboard.txt", "w", encoding = 'UTF-8')
@@ -104,6 +149,8 @@ def messageRanking(data):
     memberDict = getMembers()
     messagesDict = dict.fromkeys(memberDict, 0) #key = userid, value = total messages from that user
     
+    messagerank = open("Files\\messageRanking.txt","w",encoding = 'UTF-8')
+
     #totaling the messages for each userid
     for message in data:
         #have to check if key exists to avoid adding to nothing
@@ -124,9 +171,18 @@ def messageRanking(data):
             
     
     sortedMessages = sorted(namesDict.items(), key=lambda x: x[1], reverse=True)
-    return sortedMessages
+    if WriteToFile == False:
+        print(sortedMessages)
+        return sortedMessages
+    else:
+        for name, mes in sortedMessages:
+            messagerank.write(name + ": " + str(mes) + "\n")
+        
+        messagerank.close()
+        return sortedMessages
 
-#returns a list of members ordered by their like/message ration
+
+#returns a list of members ordered by their like/message ratio
 def likeRatioRanking(data):
     likesDict = dict(likeRanking(data))
     messagesDict = dict(messageRanking(data))
@@ -142,18 +198,31 @@ def likeRatioRanking(data):
     
     sortedRatios = sorted(ratioDict.items(), key=lambda x: x[1], reverse=True)
     #return sortedRatios
-
-    file = open("Like Ratio Leaderboard.txt", "w", encoding = 'UTF-8')
-    file.write("Like Ratio Leaderboard \n\n-------------------- \n\n" )
-    for name, likes in sortedRatios:
-        file.write(name + ": " + str(likes) + "\n")
-        
-    file.close()
+    if WriteToFile == False:
+        print(sortedRatios)
+        return sortedRatios
+    else:
+        #print(sortedRatios)
+        file = open("Files\\Like Ratio Leaderboard.txt", "w", encoding = 'UTF-8')
+        file.write("Like Ratio Leaderboard \n\n-------------------- \n\n" )
+        for name, likes in sortedRatios:
+            file.write(name + ": " + str(likes) + "\n")
+            
+        file.close()
 
 
 with open('Groupme Data/message.json', encoding = 'UTF-8') as json_file:
     data = json.load(json_file)
-    print(likeRatioRanking(data))
+    #print(likeRatioRanking(data))
+
+#run all these functions for the data to be printed or written to a file
+#findBoogity(data)
+findZo(data)
+#mostLiked(data)
+#likeRanking(data)
+#messageRanking(data)
+#likeRatioRanking(data)
+
 
 
 '''
